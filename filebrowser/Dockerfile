@@ -1,4 +1,4 @@
-FROM filebrowser/filebrowser:latest
+FROM hurlenko/filebrowser:latest
 
 ARG FB_DATABASE=/config/filebrowser.db
 ARG FB_REAL_PASSWORD
