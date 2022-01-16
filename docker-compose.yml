@@ -2,7 +2,9 @@ version: "3.2"
 
 services:
   fm:
-    build: ./Dockerfile.filebrowser
+    build:
+      context: filebrowser
+      dockerfile: Dockerfile
     user: "112:119"
     ports:
       - 127.0.0.1:${PORT_FM:-30001}:8080
@@ -34,7 +36,7 @@ services:
     restart: always
 
 volumes:
-  data:
-  config:
+  data: null
+  config: null
   foundry-cache:
     external: true
