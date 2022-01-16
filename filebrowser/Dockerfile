@@ -6,4 +6,4 @@ ARG FB_ROOT=/data
 
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
-ENTRYPOINT ["/run.sh"]
+ENTRYPOINT ["sh", "-c", "/run.sh"]
