@@ -5,9 +5,18 @@ services:
     build:
       context: filebrowser
       dockerfile: Dockerfile
-    user: "112:119"
-    ports:
-      - 127.0.0.1:${PORT_FM:-30001}:8080
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=public"
+        - "traefik.http.routers.filebrowser.rule=Host(`vtt.n1xx1.me`) && PathPrefix(`/$PREFIX/fm`)"
+        - "traefik.http.routers.filebrowser.entrypoints=https"
+        - "traefik.http.routers.filebrowser.tls=true"
+        - "traefik.http.routers.filebrowser.tls.certresolver=le"
+        - "traefik.http.routers.filebrowser.service=filebrowser"
+        - "traefik.http.services.filebrowser.loadbalancer.server.port=30000"
     volumes:
       - data:/data
       - config:/config
@@ -16,10 +25,21 @@ services:
       - FB_ROOT=/data/Data
       - FB_REAL_PASSWORD=$ADMIN_PASSWORD
     restart: always
+
   vtt:
     image: felddy/foundryvtt:9
-    ports:
-      - 127.0.0.1:${PORT_VTT:-30000}:30000
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=public"
+        - "traefik.http.routers.vtt.rule=Host(`vtt.n1xx1.me`) && PathPrefix(`/$PREFIX`)"
+        - "traefik.http.routers.vtt.entrypoints=https"
+        - "traefik.http.routers.vtt.tls=true"
+        - "traefik.http.routers.vtt.tls.certresolver=le"
+        - "traefik.http.routers.vtt.service=vtt"
+        - "traefik.http.services.vtt.loadbalancer.server.port=30000"
     volumes:
       - data:/data
       - foundry-cache:/container_cache
@@ -27,13 +47,18 @@ services:
       - FOUNDRY_ROUTE_PREFIX=$PREFIX
       - FOUNDRY_ADMIN_KEY=$ADMIN_PASSWORD
       - CONTAINER_CACHE=/container_cache
-      - FOUNDRY_UID=112
+      - FOUNDRY_UID=root
+      - FOUNDRY_GID=root
       - FOUNDRY_USERNAME
       - FOUNDRY_PASSWORD
       - FOUNDRY_LICENSE_KEY
       - FOUNDRY_MINIFY_STATIC_FILES=true
       - FOUNDRY_PROXY_PORT=80
     restart: always
+
+networks:
+  public:
+    external: true
 
 volumes:
   data: null
